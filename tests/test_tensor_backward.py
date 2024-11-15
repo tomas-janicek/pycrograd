@@ -8,14 +8,13 @@ from pycrograd import tensor
 
 
 def test_grad_initialization() -> None:
-    m1 = tensor.Matrix(np.array([[1.0, 2.0, 3.0]]), requires_grad=False)
-    m2 = tensor.Matrix(np.array([[1.0, 2.0, 3.0]]), requires_grad=True)
+    m1 = tensor.Tensor(np.array([[1.0, 2.0, 3.0]]), requires_grad=False)
+    m2 = tensor.Tensor(np.array([[1.0, 2.0, 3.0]]), requires_grad=True)
 
     assert m1.grad is None
 
     assert m2.grad is not None
-    assert m2.grad.rows == 1
-    assert m2.grad.cols == 3
+    assert m2.grad.shape == (1, 3)
     assert m2.grad[0, 0] == 0.0
     assert m2.grad[0, 2] == 0.0
 
@@ -24,7 +23,7 @@ def test_sum() -> None:
     t1 = torch.tensor([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]], requires_grad=True)
     t2 = t1.sum()
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]), requires_grad=True
     )
     m2 = m1.sum()
@@ -45,7 +44,7 @@ def test_mean() -> None:
     t1 = torch.tensor([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]], requires_grad=True)
     t2 = t1.mean()
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]), requires_grad=True
     )
     m2 = m1.mean()
@@ -67,8 +66,8 @@ def test_matmul() -> None:
     t2 = torch.tensor([[7.0], [8.0], [9.0]], requires_grad=True)
     result1 = t1 @ t2
 
-    m1 = tensor.Matrix(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), requires_grad=True)
-    m2 = tensor.Matrix(np.array([[7.0], [8.0], [9.0]]), requires_grad=True)
+    m1 = tensor.Tensor(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), requires_grad=True)
+    m2 = tensor.Tensor(np.array([[7.0], [8.0], [9.0]]), requires_grad=True)
     result2 = m1 @ m2
 
     assert result1[0, 0] == result2[0, 0]
@@ -100,10 +99,10 @@ def test_addition() -> None:
     t2 = torch.tensor([[4.0, 0.0], [5.0, 1.0], [6.0, 2.0]], requires_grad=True)
     result1 = t1 + t2
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]), requires_grad=True
     )
-    m2 = tensor.Matrix(
+    m2 = tensor.Tensor(
         np.array([[4.0, 0.0], [5.0, 1.0], [6.0, 2.0]]), requires_grad=True
     )
     result2 = m1 + m2
@@ -137,7 +136,7 @@ def test_multiplication() -> None:
     t1 = torch.tensor([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]], requires_grad=True)
     result1 = t1 * 2
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]), requires_grad=True
     )
     result2 = m1 * 2
@@ -165,7 +164,7 @@ def test_relu() -> None:
     t1 = torch.tensor([[-1.0, 4.0], [2.0, -5.0], [-3.0, -6.0]], requires_grad=True)
     result1 = t1.relu()
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[-1.0, 4.0], [2.0, -5.0], [-3.0, -6.0]]), requires_grad=True
     )
     result2 = m1.relu()
@@ -195,11 +194,11 @@ def test_combination() -> None:
     t3 = torch.tensor([[7.0], [8.0], [9.0]], requires_grad=True)
     result1 = 3 * ((t1 + t2) - t1**2) @ (-t3 / 2)
 
-    m1 = tensor.Matrix(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), requires_grad=True)
-    m2 = tensor.Matrix(
+    m1 = tensor.Tensor(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), requires_grad=True)
+    m2 = tensor.Tensor(
         np.array([[-1.0, 4.0, 5.0], [0.0, -3.0, -6.0]]), requires_grad=True
     )
-    m3 = tensor.Matrix(np.array([[7.0], [8.0], [9.0]]), requires_grad=True)
+    m3 = tensor.Tensor(np.array([[7.0], [8.0], [9.0]]), requires_grad=True)
     result2 = 3 * ((m1 + m2) - m1**2) @ (-m3 / 2)
 
     assert result1[0, 0] == result2[0, 0]
@@ -226,7 +225,7 @@ def test_use_one_multiple_times() -> None:
     )
     result1 = t1 @ t1 @ t1 @ t1 @ t1 @ t1
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [1.0, 2.0, 3.0]]),
         requires_grad=True,
     )
@@ -256,7 +255,7 @@ def test_log() -> None:
     )
     log1 = t1.log()
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [1.0, 2.0, 3.0]]),
         requires_grad=True,
     )
@@ -287,7 +286,7 @@ def test_exp() -> None:
     )
     exp1 = t1.exp()
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [1.0, 2.0, 3.0]]),
         requires_grad=True,
     )
@@ -339,7 +338,7 @@ def test_softmax() -> None:
     )
     s1 = F.softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[0.0], [2.0], [3.0]]),
         requires_grad=True,
     )
@@ -371,7 +370,7 @@ def test_softmax_2() -> None:
     )
     s1 = F.softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[2.0], [1.0], [0.1]]),
         requires_grad=True,
     )
@@ -403,7 +402,7 @@ def test_softmax_equal() -> None:
     )
     s1 = F.softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.0], [1.5], [1.75]]),
         requires_grad=True,
     )
@@ -435,7 +434,7 @@ def test_softmax_one_big() -> None:
     )
     s1 = F.softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.5], [26.0], [3000000.0]]),
         requires_grad=True,
     )
@@ -467,7 +466,7 @@ def test_log_softmax() -> None:
     )
     ls1 = F.log_softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.5], [26.0], [3000000.0]]),
         requires_grad=True,
     )
@@ -500,7 +499,7 @@ def test_log_softmax_2() -> None:
     )
     ls1 = F.log_softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.5], [26.0], [10000.0]]),
         requires_grad=True,
     )
@@ -532,7 +531,7 @@ def test_log_softmax_3() -> None:
     )
     ls1 = F.log_softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[0.5], [0.75], [0.01]]),
         requires_grad=True,
     )
@@ -564,7 +563,7 @@ def test_log_softmax_4() -> None:
     )
     ls1 = F.log_softmax(t1, dim=0)
 
-    m1 = tensor.Matrix(
+    m1 = tensor.Tensor(
         np.array([[1.5], [3000000.0], [3000000.0]]),
         requires_grad=True,
     )

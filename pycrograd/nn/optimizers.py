@@ -20,7 +20,7 @@ class SGD(Optimizer):
     def step(self) -> None:
         for parameters_sequence in self.parameters_dict.values():
             for parameters in parameters_sequence:
-                assert parameters.grad
+                assert parameters.grad is not None
                 for row in range(parameters.rows):
                     for col in range(parameters.cols):
                         parameters[row, col] -= (
@@ -31,7 +31,7 @@ class SGD(Optimizer):
     def zero_grad(self) -> None:
         for parameters_sequence in self.parameters_dict.values():
             for parameters in parameters_sequence:
-                assert parameters.grad
+                assert parameters.grad is not None
                 for row in range(parameters.rows):
                     for col in range(parameters.cols):
                         parameters.grad[row, col] = 0
@@ -57,7 +57,7 @@ class SGDVariable(Optimizer):
     def step(self) -> None:
         for parameters_sequence in self.parameters_dict.values():
             for parameters in parameters_sequence:
-                assert parameters.grad
+                assert parameters.grad is not None
                 for row in range(parameters.rows):
                     for col in range(parameters.cols):
                         parameters[row, col] -= (
@@ -69,7 +69,7 @@ class SGDVariable(Optimizer):
     def zero_grad(self) -> None:
         for parameters_sequence in self.parameters_dict.values():
             for parameters in parameters_sequence:
-                assert parameters.grad
+                assert parameters.grad is not None
                 for row in range(parameters.rows):
                     for col in range(parameters.cols):
                         parameters.grad[row, col] = 0

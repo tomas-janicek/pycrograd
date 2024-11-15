@@ -10,28 +10,43 @@ cli = typer.Typer()
 @cli.command(name="train_mlp")
 def train_mlp(epochs: int = 100) -> None:
     model = nn.MLP()
-    optimizer = nn.SGDVariable(learning_rate=1, parameters_dict=model.parameters())
-    trainer = trainers.MLPTrainer(model=model, optimizer=optimizer)
-    data = datasets.MoonsData(length=100)
-    trainer.fit(epochs=epochs, data=data)
+    optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
+    trainer = trainers.Trainer(
+        model=model,
+        optimizer=optimizer,
+        loss_function=nn.max_margin_loss,
+        accuracy_function=nn.calculate_accuracy_binary,
+    )
+    data = datasets.MoonsData(length=1000)
+    trainer.fit(epochs=epochs, batch_size=10, data=data)
 
 
 @cli.command(name="train_digits")
-def train_digits(epochs: int = 5) -> None:
+def train_digits(epochs: int = 10) -> None:
     model = nn.MLPDigits()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
-    trainer = trainers.DigitsTrainer(model=model, optimizer=optimizer)
-    data = datasets.DigitsData(length=100)
-    trainer.fit(epochs=epochs, data=data)
+    trainer = trainers.Trainer(
+        model=model,
+        optimizer=optimizer,
+        loss_function=nn.cross_entropy_loss,
+        accuracy_function=nn.calculate_accuracy,
+    )
+    data = datasets.DigitsData(length=1000)
+    trainer.fit(epochs=epochs, batch_size=32, data=data)
 
 
 @cli.command(name="train_mnist")
-def train_mnist(epochs: int = 5) -> None:
+def train_mnist(epochs: int = 20) -> None:
     model = nn.MLPMnist()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
-    trainer = trainers.MnistTrainer(model=model, optimizer=optimizer)
-    data = datasets.MnistData(length=100, batch_size=2)
-    trainer.fit(epochs=epochs, data=data)
+    trainer = trainers.Trainer(
+        model=model,
+        optimizer=optimizer,
+        loss_function=nn.cross_entropy_loss,
+        accuracy_function=nn.calculate_accuracy,
+    )
+    data = datasets.MnistData(length=1000)
+    trainer.fit(epochs=epochs, batch_size=32, data=data)
 
 
 @cli.command(name="get_recommended_num_workers")

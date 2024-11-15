@@ -9,10 +9,10 @@ def test_get_parameters() -> None:
     layer = nn.Linear(in_features=2, out_features=2)
     weights_params, bias_params = layer.parameters()
 
-    assert weights_params.grad
-    assert bias_params.grad
-    assert layer.weights.grad
-    assert layer.biases.grad
+    assert weights_params.grad is not None
+    assert bias_params.grad is not None
+    assert layer.weights.grad is not None
+    assert layer.biases.grad is not None
 
     assert weights_params.grad[0, 0] == 0.0
     assert bias_params.grad[0, 0] == 0.0
@@ -33,8 +33,8 @@ def test_cross_entropy_loss() -> None:
     target = torch.tensor([1])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Matrix(np.array([[75.0], [5.0], [20.0]]))
-    target = tensor.Matrix(np.array([[0, 1, 0]]))
+    input = tensor.Tensor(np.array([[75.0], [5.0], [20.0]]))
+    target = tensor.Tensor(np.array([[0, 1, 0]]))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 
@@ -46,8 +46,8 @@ def test_cross_entropy_loss_2() -> None:
     target = torch.tensor([0])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Matrix(np.array([[75.0], [5.0], [20.0]]))
-    target = tensor.Matrix(np.array([[1, 0, 0]]))
+    input = tensor.Tensor(np.array([[75.0], [5.0], [20.0]]))
+    target = tensor.Tensor(np.array([[1, 0, 0]]))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 
@@ -59,8 +59,8 @@ def test_cross_entropy_loss_random() -> None:
     target = torch.tensor([0])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Matrix(np.array([[75.0], [0.0], [2000.0]]))
-    target = tensor.Matrix(np.array([[1, 0, 0]]))
+    input = tensor.Tensor(np.array([[75.0], [0.0], [2000.0]]))
+    target = tensor.Tensor(np.array([[1, 0, 0]]))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 

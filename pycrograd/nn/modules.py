@@ -4,15 +4,19 @@ from pycrograd import enums, tensor
 
 from . import init
 
-ParametersDict = typing.Mapping[str, typing.Sequence[tensor.Matrix]]
+ParametersDict = typing.Mapping[str, typing.Sequence[tensor.Tensor]]
 
 
-class Module(typing.Protocol):
+InputT = typing.TypeVar("InputT")
+OutputT = typing.TypeVar("OutputT")
+
+
+class Module(typing.Protocol[InputT, OutputT]):  # type: ignore
     def parameters(self) -> ParametersDict: ...
 
-    def forward(self, input: tensor.Matrix) -> tensor.Matrix: ...
+    def forward(self, input: InputT) -> OutputT: ...
 
-    def __call__(self, input: tensor.Matrix) -> tensor.Matrix:
+    def __call__(self, input: InputT) -> OutputT:
         return self.forward(input)
 
 
@@ -37,10 +41,10 @@ class Linear:
                     rows=out_features, cols=1
                 )
 
-    def forward(self, input: tensor.Matrix) -> tensor.Matrix:
+    def forward(self, input: tensor.Tensor) -> tensor.Tensor:
         return self.weights @ input + self.biases
 
-    def parameters(self) -> typing.Sequence[tensor.Matrix]:
+    def parameters(self) -> typing.Sequence[tensor.Tensor]:
         return (self.weights, self.biases)
 
     def __repr__(self) -> str:

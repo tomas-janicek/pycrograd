@@ -1,21 +1,44 @@
+import typing
+
 import numpy as np
 
 from pycrograd import tensor
 
 from . import modules
 
+DataT = typing.TypeVar("DataT")
+TargetT = typing.TypeVar("TargetT")
 
-def cross_entropy_loss(
-    input: list[tensor.Matrix],
-    target: list[tensor.Matrix],
+
+class LossFunction(typing.Protocol[DataT, TargetT]):  # type: ignore
+    def __call__(
+        self,
+        input: typing.Sequence[DataT],
+        target: typing.Sequence[TargetT],
+        parameters_dict: modules.ParametersDict | None = None,
+    ) -> tensor.Tensor: ...
+
+
+class AccuracyFunction(typing.Protocol[DataT, TargetT]):  # type: ignore
+    def __call__(
+        self,
+        input: typing.Sequence[DataT],
+        target: typing.Sequence[TargetT],
+    ) -> float: ...
+
+
+def max_margin_loss(
+    input: typing.Sequence[tensor.Tensor],
+    target: typing.Sequence[int],
     parameters_dict: modules.ParametersDict | None = None,
-) -> tensor.Matrix:
-    losses: list[tensor.Matrix] = []
+) -> tensor.Tensor:
+    one = tensor.Tensor.create_scalar(1)
+    losses: list[tensor.Tensor] = []
     for i in range(len(input)):
-        loss = target[i] @ input[i]
+        loss = (one + float(-target[i]) * input[i]).relu()
         losses.append(loss)
 
-    data_loss = -sum(losses, start=tensor.Matrix.create_scalar(0)) / len(losses)
+    data_loss = sum(losses, start=tensor.Tensor.create_scalar(0)) / len(losses)
 
     # L2 regularization
     if parameters_dict:
@@ -25,12 +48,32 @@ def cross_entropy_loss(
     return data_loss
 
 
-def get_reg_loss(parameters_dict: modules.ParametersDict) -> tensor.Matrix:
+def cross_entropy_loss(
+    input: typing.Sequence[tensor.Tensor],
+    target: typing.Sequence[tensor.Tensor],
+    parameters_dict: modules.ParametersDict | None = None,
+) -> tensor.Tensor:
+    losses: list[tensor.Tensor] = []
+    for i in range(len(input)):
+        loss = target[i] @ input[i]
+        losses.append(loss)
+
+    data_loss = -sum(losses, start=tensor.Tensor.create_scalar(0)) / len(losses)
+
+    # L2 regularization
+    if parameters_dict:
+        reg_loss = get_reg_loss(parameters_dict)
+        return data_loss + reg_loss
+
+    return data_loss
+
+
+def get_reg_loss(parameters_dict: modules.ParametersDict) -> tensor.Tensor:
     """L2 norm  places an outsize penalty on large components of the weight vector.
     This biases our learning algorithm towards models that **distribute weight evenly
     across a larger number of features**."""
     alpha = 1e-4
-    summed_squared_parameters = tensor.Matrix.create_scalar(0, requires_grad=True)
+    summed_squared_parameters = tensor.Tensor.create_scalar(0, requires_grad=True)
     for parameters_sequence in parameters_dict.values():
         for parameters in parameters_sequence:
             summed_squared_parameters += (parameters**2).sum()
@@ -38,8 +81,8 @@ def get_reg_loss(parameters_dict: modules.ParametersDict) -> tensor.Matrix:
 
 
 def calculate_accuracy(
-    input: list[tensor.Matrix],
-    target: list[tensor.Matrix],
+    input: typing.Sequence[tensor.Tensor],
+    target: typing.Sequence[tensor.Tensor],
 ) -> float:
     correct_predictions = 0
     all_predations = 0
@@ -56,3 +99,14 @@ def calculate_accuracy(
         all_predations += 1
 
     return correct_predictions / all_predations
+
+
+def calculate_accuracy_binary(
+    input: typing.Sequence[tensor.Tensor],
+    target: typing.Sequence[int],
+) -> float:
+    accuracy: list[bool] = [
+        (yi > 0.0) == (scorei.item() > 0.0)
+        for yi, scorei in zip(target, input, strict=True)
+    ]
+    return sum(accuracy) / len(accuracy)

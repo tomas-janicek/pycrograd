@@ -3,7 +3,7 @@ from pycrograd import enums, tensor
 from . import modules
 
 
-class MLP(modules.Module):
+class MLP(modules.Module[tensor.Tensor, tensor.Tensor]):
     def __init__(self) -> None:
         self.l1 = modules.Linear(
             in_features=2, out_features=16, initialization=enums.Initialization.KAIMING
@@ -15,7 +15,7 @@ class MLP(modules.Module):
             in_features=16, out_features=1, initialization=enums.Initialization.KAIMING
         )
 
-    def forward(self, input: tensor.Matrix) -> tensor.Matrix:
+    def forward(self, input: tensor.Tensor) -> tensor.Tensor:
         out = self.l1.forward(input)
         out = out.relu()
         out = self.l2.forward(out)
@@ -40,7 +40,7 @@ class MLP(modules.Module):
         return _repr
 
 
-class MLPDigits(modules.Module):
+class MLPDigits(modules.Module[tensor.Tensor, tensor.Tensor]):
     def __init__(self) -> None:
         self.l1 = modules.Linear(
             in_features=8 * 8,
@@ -54,7 +54,7 @@ class MLPDigits(modules.Module):
             in_features=32, out_features=10, initialization=enums.Initialization.KAIMING
         )
 
-    def forward(self, input: tensor.Matrix) -> tensor.Matrix:
+    def forward(self, input: tensor.Tensor) -> tensor.Tensor:
         out = self.l1.forward(input)
         out = out.relu()
         out = self.l2.forward(out)
@@ -80,25 +80,25 @@ class MLPDigits(modules.Module):
         return _repr
 
 
-class MLPMnist(modules.Module):
+class MLPMnist(modules.Module[tensor.Tensor, tensor.Tensor]):
     def __init__(self) -> None:
         self.l1 = modules.Linear(
             in_features=28 * 28,
-            out_features=128,
-            initialization=enums.Initialization.KAIMING,
-        )
-        self.l2 = modules.Linear(
-            in_features=128,
             out_features=64,
             initialization=enums.Initialization.KAIMING,
         )
-        self.l3 = modules.Linear(
+        self.l2 = modules.Linear(
             in_features=64,
+            out_features=32,
+            initialization=enums.Initialization.KAIMING,
+        )
+        self.l3 = modules.Linear(
+            in_features=32,
             out_features=10,
             initialization=enums.Initialization.KAIMING,
         )
 
-    def forward(self, input: tensor.Matrix) -> tensor.Matrix:
+    def forward(self, input: tensor.Tensor) -> tensor.Tensor:
         out = self.l1.forward(input)
         out = out.relu()
         out = self.l2.forward(out)

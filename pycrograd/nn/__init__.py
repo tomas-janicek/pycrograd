@@ -1,4 +1,12 @@
-from .loss import calculate_accuracy, cross_entropy_loss, get_reg_loss
+from .loss import (
+    AccuracyFunction,
+    LossFunction,
+    calculate_accuracy,
+    calculate_accuracy_binary,
+    cross_entropy_loss,
+    get_reg_loss,
+    max_margin_loss,
+)
 from .models import MLP, MLPDigits, MLPMnist
 from .modules import Linear, Module, ParametersDict
 from .optimizers import SGD, Optimizer, SGDVariable
@@ -16,4 +24,8 @@ __all__ = [
     "calculate_accuracy",
     "cross_entropy_loss",
     "get_reg_loss",
+    "LossFunction",
+    "AccuracyFunction",
+    "max_margin_loss",
+    "calculate_accuracy_binary",
 ]
