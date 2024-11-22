@@ -73,11 +73,12 @@ def get_reg_loss(parameters_dict: modules.ParametersDict) -> tensor.Tensor:
     This biases our learning algorithm towards models that **distribute weight evenly
     across a larger number of features**."""
     alpha = 1e-4
-    summed_squared_parameters = tensor.Tensor.create_scalar(0, requires_grad=True)
+    summed_squared_parameters = 0
+
     for parameters_sequence in parameters_dict.values():
         for parameters in parameters_sequence:
-            summed_squared_parameters += (parameters**2).sum()
-    return alpha * summed_squared_parameters
+            summed_squared_parameters += (parameters**2).sum().item()
+    return tensor.Tensor.create_scalar(alpha * summed_squared_parameters)
 
 
 def calculate_accuracy(

@@ -4,7 +4,7 @@ import typing
 import numpy as np
 from numpy import typing as np_typing
 
-from pycrograd import grad
+from pycrograd import grads
 
 GradFunction = typing.Callable[["Tensor"], None]
 
@@ -17,53 +17,111 @@ class Tensor:
     def __init__(
         self,
         data: np_typing.NDArray[np.float32],
+        op: str = "",
+        backward: GradFunction = _default_backward,
+        previous: typing.Sequence["Tensor"] = (),
+        grad_args: typing.Sequence[float] = (),
         requires_grad: bool = False,
-        _op: str = "",
-        _children: typing.Sequence["Tensor"] = (),
-        _grad_args: typing.Sequence[typing.Any] = (),
     ) -> None:
         assert len(data.shape) == 2
 
         self.data = data
         self.rows = len(data)
         self.cols = len(data[0])
-
-        self.op = _op
-        self.prev = _children
-        self.grad_args: typing.Sequence[typing.Any] = _grad_args
         self.requires_grad = requires_grad
+
         if self.requires_grad:
             self.grad = np.zeros((self.rows, self.cols))
+            self.op = op
+            self.prev = previous
+            self.grad_args = grad_args
+            self._backward = backward
         else:
             self.grad = None
-        self._backward: GradFunction = _default_backward
+            self.op = ""
+            self.prev: typing.Sequence[Tensor] = ()
+            self.grad_args: typing.Sequence[float] = ()
+            self._backward = _default_backward
 
     @staticmethod
-    def create_zeroed(rows: int, cols: int, requires_grad: bool = False) -> "Tensor":
+    def create_zeroed(
+        rows: int,
+        cols: int,
+        op: str = "",
+        backward: GradFunction = _default_backward,
+        previous: typing.Sequence["Tensor"] = (),
+        grad_args: typing.Sequence[float] = (),
+        requires_grad: bool = False,
+    ) -> "Tensor":
         return Tensor.create_with_value(
-            0.0, rows=rows, cols=cols, requires_grad=requires_grad
+            0.0,
+            rows=rows,
+            cols=cols,
+            op=op,
+            backward=backward,
+            previous=previous,
+            grad_args=grad_args,
+            requires_grad=requires_grad,
         )
 
     @staticmethod
     def create_with_value(
-        value: float, rows: int, cols: int, requires_grad: bool = False
+        value: float,
+        rows: int,
+        cols: int,
+        op: str = "",
+        backward: GradFunction = _default_backward,
+        previous: typing.Sequence["Tensor"] = (),
+        grad_args: typing.Sequence[float] = (),
+        requires_grad: bool = False,
     ) -> "Tensor":
         data = np.array(
             [[value for _col in range(cols)] for _row in range(rows)]
         ).astype(np.float32)
-        return Tensor(data, requires_grad=requires_grad)
+        return Tensor(
+            data,
+            requires_grad=requires_grad,
+            op=op,
+            backward=backward,
+            previous=previous,
+            grad_args=grad_args,
+        )
 
     @staticmethod
     def create_vector(
-        it: typing.Iterable[float], requires_grad: bool = False
+        it: typing.Iterable[float],
+        op: str = "",
+        backward: GradFunction = _default_backward,
+        previous: typing.Sequence["Tensor"] = (),
+        grad_args: typing.Sequence[float] = (),
+        requires_grad: bool = False,
     ) -> "Tensor":
         data = np.array([[item] for item in it]).astype(np.float32)
-        return Tensor(data, requires_grad=requires_grad)
+        return Tensor(
+            data,
+            requires_grad=requires_grad,
+            op=op,
+            backward=backward,
+            previous=previous,
+            grad_args=grad_args,
+        )
 
     @staticmethod
-    def create_scalar(value: float, requires_grad: bool = False) -> "Tensor":
+    def create_scalar(
+        value: float,
+        op: str = "",
+        backward: GradFunction = _default_backward,
+        previous: typing.Sequence["Tensor"] = (),
+        grad_args: typing.Sequence[float] = (),
+        requires_grad: bool = False,
+    ) -> "Tensor":
         return Tensor(
-            np.array([[value]]).astype(np.float32), requires_grad=requires_grad
+            np.array([[value]]).astype(np.float32),
+            op=op,
+            backward=backward,
+            previous=previous,
+            grad_args=grad_args,
+            requires_grad=requires_grad,
         )
 
     def backward(self) -> None:
@@ -103,21 +161,28 @@ class Tensor:
             for col in range(self.cols):
                 sum += self[row, col]
 
-        out = Tensor.create_scalar(sum, requires_grad=self.requires_grad)
-        out._set_grad_metadata(grad.sum_backward, children=(self,), op="sum")
+        out = Tensor.create_scalar(
+            sum,
+            op="sum",
+            backward=grads.sum_backward,
+            previous=(self,),
+            requires_grad=self.requires_grad,
+        )
         return out
 
     def log(self) -> "Tensor":
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op="log",
+            backward=grads.log_backward,
+            previous=(self,),
             requires_grad=self.requires_grad,
         )
         for row in range(out.rows):
             for col in range(out.cols):
                 out[row, col] = np.log(self.data[row, col])
 
-        out._set_grad_metadata(backward=grad.log_backward, children=(self,), op="log")
         return out
 
     def concat(self, other: "Tensor") -> "Tensor":
@@ -126,6 +191,9 @@ class Tensor:
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols + other.cols,
+            op="concat",
+            backward=grads.concat_backward,
+            previous=(self, other),
             requires_grad=self.requires_grad or other.requires_grad,
         )
         for row in range(self.rows):
@@ -136,22 +204,21 @@ class Tensor:
             for col in range(other.cols):
                 out[row, col + self.cols] = other[row, col]
 
-        out._set_grad_metadata(
-            backward=grad.concat_backward, children=(self, other), op="concat"
-        )
         return out
 
     def relu(self) -> "Tensor":
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op="relu",
+            backward=grads.relu_backward,
+            previous=(self,),
             requires_grad=self.requires_grad,
         )
         for row in range(out.rows):
             for col in range(out.cols):
                 out[row, col] = max(self.data[row][col], 0)
 
-        out._set_grad_metadata(backward=grad.relu_backward, children=(self,), op="relu")
         return out
 
     # Sources
@@ -170,12 +237,12 @@ class Tensor:
 
         out = Tensor(
             probabilities,
+            op="softmax",
+            backward=grads.softmax_backward,
+            previous=(self,),
             requires_grad=self.requires_grad,
         )
 
-        out._set_grad_metadata(
-            backward=grad.softmax_backward, children=(self,), op="softmax"
-        )
         return out
 
     def log_softmax(self) -> "Tensor":
@@ -191,10 +258,10 @@ class Tensor:
 
         log_probabilities = Tensor(
             log_probabilities_data,
+            op="log_softmax",
+            backward=grads.log_softmax_backward,
+            previous=(self,),
             requires_grad=self.requires_grad,
-        )
-        log_probabilities._set_grad_metadata(
-            backward=grad.log_softmax_backward, children=(self,), op="softmax"
         )
 
         return log_probabilities
@@ -203,13 +270,15 @@ class Tensor:
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op="exp",
+            backward=grads.exp_backward,
+            previous=(self,),
             requires_grad=self.requires_grad,
         )
         for row in range(out.rows):
             for col in range(out.cols):
                 out[row, col] = np.exp(self.data[row][col])
 
-        out._set_grad_metadata(backward=grad.exp_backward, children=(self,), op="log")
         return out
 
     def __getitem__(self, indexes: tuple[int, int]) -> float:
@@ -226,6 +295,9 @@ class Tensor:
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=other.cols,
+            op="@",
+            backward=grads.matmul_backward,
+            previous=(self, other),
             requires_grad=self.requires_grad or other.requires_grad,
         )
         for m in range(out.rows):
@@ -233,9 +305,6 @@ class Tensor:
                 for n in range(out.cols):
                     out[m, n] += self[m, k] * other[k, n]
 
-        out._set_grad_metadata(
-            backward=grad.matmul_backward, children=(self, other), op="@"
-        )
         return out
 
     def __add__(self, other: "Tensor") -> "Tensor":
@@ -245,51 +314,47 @@ class Tensor:
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op="+",
+            backward=grads.addition_backward,
+            previous=(self, other),
             requires_grad=self.requires_grad or other.requires_grad,
         )
         for row in range(out.rows):
             for col in range(out.cols):
                 out[row, col] = self[row, col] + other[row, col]
 
-        out._set_grad_metadata(
-            backward=grad.addition_backward, children=(self, other), op="+"
-        )
         return out
 
     def __mul__(self, other: int | float) -> "Tensor":
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op="*",
+            backward=grads.mul_backward,
+            previous=(self,),
+            grad_args=(other,),
             requires_grad=self.requires_grad,
         )
         for row in range(self.rows):
             for col in range(self.cols):
                 out[row, col] = self[row, col] * other
 
-        out._set_grad_metadata(
-            backward=grad.mul_backward,
-            children=(self,),
-            op="*",
-            grad_args=(other,),
-        )
         return out
 
     def __pow__(self, other: int | float) -> "Tensor":
         out = Tensor.create_zeroed(
             rows=self.rows,
             cols=self.cols,
+            op=f"**{other}",
+            backward=grads.power_backward,
+            previous=(self,),
+            grad_args=(other,),
             requires_grad=self.requires_grad,
         )
         for row in range(out.rows):
             for col in range(out.cols):
                 out[row, col] = self[row, col] ** other
 
-        out._set_grad_metadata(
-            backward=grad.power_backward,
-            children=(self,),
-            op=f"**{other}",
-            grad_args=(other,),
-        )
         return out
 
     def __neg__(self) -> "Tensor":  # -self
@@ -328,19 +393,6 @@ class Tensor:
             f"_op={self.op})"
         )
         return _repr
-
-    def _set_grad_metadata(
-        self,
-        backward: GradFunction,
-        children: typing.Sequence["Tensor"],
-        grad_args: typing.Sequence[typing.Any] = (),
-        op: str = "",
-    ) -> None:
-        if self.requires_grad:
-            self._backward = backward
-            self.prev = children
-            self.grad_args = grad_args
-            self.op = op
 
     def _set_grad_to_ones(self) -> None:
         assert self.grad is not None

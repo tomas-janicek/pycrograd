@@ -311,26 +311,6 @@ def test_exp() -> None:
     assert t1.grad[1, 1] == m1.grad[1, 1]
 
 
-def test_softmax_torch() -> None:
-    t1 = torch.randn(2, 3, requires_grad=True)
-    s1 = F.softmax(t1, dim=1)
-    sum1 = s1.sum()
-    sum1.backward()
-
-    assert t1.grad is not None
-
-
-def test_log_softmax_torch() -> None:
-    t1 = torch.tensor(
-        [[1.6148, -0.4315, 0.4672], [-0.4363, -0.1541, -0.4183]], requires_grad=True
-    )
-    s1 = F.log_softmax(t1, dim=1)
-    sum1 = s1.sum()
-    sum1.backward()
-
-    assert t1.grad is not None
-
-
 def test_softmax() -> None:
     t1 = torch.tensor(
         [[0.0], [2.0], [3.0]],
@@ -565,6 +545,38 @@ def test_log_softmax_4() -> None:
 
     m1 = tensor.Tensor(
         np.array([[1.5], [3000000.0], [3000000.0]]),
+        requires_grad=True,
+    )
+    ls2 = m1.log_softmax()
+
+    assert math.isclose(ls1[0, 0], ls2[0, 0], rel_tol=1e-3)
+    assert math.isclose(ls1[1, 0], ls2[1, 0], rel_tol=1e-3)
+    assert math.isclose(ls1[2, 0], ls2[2, 0], rel_tol=1e-3)
+
+    sum1 = ls1.sum()
+    sum2 = ls2.sum()
+
+    assert math.isclose(sum1.item(), sum2.item(), rel_tol=1e-3)
+
+    sum1.backward()
+    sum2.backward()
+
+    assert t1.grad is not None
+    assert m1.grad is not None
+    assert math.isclose(t1.grad[0, 0], m1.grad[0, 0], abs_tol=1e-5)
+    assert math.isclose(t1.grad[1, 0], m1.grad[1, 0], abs_tol=1e-5)
+    assert math.isclose(t1.grad[2, 0], m1.grad[2, 0], abs_tol=1e-5)
+
+
+def test_log_softmax_5() -> None:
+    t1 = torch.tensor(
+        [[0.5], [200.0], [2000.0]],
+        requires_grad=True,
+    )
+    ls1 = F.log_softmax(t1, dim=0)
+
+    m1 = tensor.Tensor(
+        np.array([[0.5], [200.0], [2000.0]]),
         requires_grad=True,
     )
     ls2 = m1.log_softmax()

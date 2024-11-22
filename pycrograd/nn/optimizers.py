@@ -15,7 +15,6 @@ class SGD(Optimizer):
     ) -> None:
         self.parameters_dict = parameters_dict
         self.learning_rate = learning_rate
-        self.steps = 0
 
     def step(self) -> None:
         for parameters_sequence in self.parameters_dict.values():
@@ -26,7 +25,6 @@ class SGD(Optimizer):
                         parameters[row, col] -= (
                             self.learning_rate * parameters.grad[row, col]
                         )
-        self.steps += 1
 
     def zero_grad(self) -> None:
         for parameters_sequence in self.parameters_dict.values():

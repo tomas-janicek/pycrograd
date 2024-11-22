@@ -144,14 +144,8 @@ def log_softmax_backward(out: "tensor.Tensor") -> None:
 
     assert m.grad is not None and out.grad is not None
 
-    row_vector = out.data.T
-    row_vector_grad = out.grad.T
+    grad = out.grad - (np.exp(out.data) * out.grad.sum())
 
-    softmax_values = np.exp(row_vector)
-
-    grad = row_vector_grad - (
-        softmax_values * row_vector_grad.sum(axis=1, keepdims=True)
-    )
     for row in range(m.rows):
         for col in range(m.cols):
-            m.grad[row, col] = grad[col, row]
+            m.grad[row, col] = grad[row, col]

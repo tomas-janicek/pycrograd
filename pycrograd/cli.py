@@ -36,7 +36,7 @@ def train_digits(epochs: int = 10) -> None:
 
 
 @cli.command(name="train_mnist")
-def train_mnist(epochs: int = 20) -> None:
+def train_mnist(epochs: int = 5) -> None:
     model = nn.MLPMnist()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
     trainer = trainers.Trainer(
@@ -45,7 +45,7 @@ def train_mnist(epochs: int = 20) -> None:
         loss_function=nn.cross_entropy_loss,
         accuracy_function=nn.calculate_accuracy,
     )
-    data = datasets.MnistData(length=1000)
+    data = datasets.MnistData(length=100)
     trainer.fit(epochs=epochs, batch_size=32, data=data)
 
 

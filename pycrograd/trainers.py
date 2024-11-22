@@ -35,16 +35,15 @@ class Trainer(typing.Generic[DataT, TargetT]):
         batch_size: int,
         data: datasets.Dataset[DataT, TargetT],
     ) -> None:
-        train_dataloader = datasets.Dataloader(batch_size, dataset=data)
-        validation_dataloader = datasets.Dataloader(batch_size, dataset=data)
+        dataloader = datasets.Dataloader(batch_size, dataset=data)
 
         for epoch in range(epochs):
-            loss, accuracy = self.do_training(train_dataloader)
+            loss, accuracy = self.do_training(dataloader)
             print(
                 f"Training Epoch   {epoch:3}, loss {loss:3.4f}, accuracy {accuracy:3.2%}"
             )
 
-            loss, accuracy = self.do_validation(validation_dataloader)
+            loss, accuracy = self.do_validation(dataloader)
             print(
                 f"Validation Epoch {epoch:3}, loss {loss:3.4f}, accuracy {accuracy:3.2%}"
             )
