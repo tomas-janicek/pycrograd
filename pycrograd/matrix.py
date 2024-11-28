@@ -12,18 +12,28 @@ class Matrix:
         cols: int,
         data: array[float],
     ) -> None:
+        assert rows * cols == len(data)
+
         self.rows = rows
         self.cols = cols
         self.data = data
 
     @classmethod
     def create_zeroed(cls, rows: int, cols: int) -> "Matrix":
-        data = array("f", (rows * cols) * [0.0])
+        return cls.create_with_value(rows, cols, 0.0)
+
+    @classmethod
+    def create_with_value(cls, rows: int, cols: int, value: float) -> "Matrix":
+        data = array("f", (rows * cols) * [value])
         return cls(rows, cols, data)
 
     @classmethod
-    def create_from_value(cls, value: float) -> "Matrix":
+    def create_scalar(cls, value: float) -> "Matrix":
         return cls(1, 1, array("f", [value]))
+
+    @classmethod
+    def create_vector(cls, it: typing.Sequence[float]) -> "Matrix":
+        return cls(len(it), 1, array("f", it))
 
     @classmethod
     def rand(cls, rows: int, cols: int) -> "Matrix":
@@ -112,7 +122,7 @@ class Matrix:
         out = Matrix.create_zeroed(rows=self.rows, cols=self.cols)
         for row in range(self.rows):
             for col in range(self.cols):
-                out[row, col] = self[row, col] * other
+                out[row, col] = self[row, col] ** other
 
         return out
 
@@ -137,7 +147,7 @@ class Matrix:
             for col in range(self.cols):
                 total_sum += self[row, col]
 
-        out = Matrix.create_from_value(total_sum)
+        out = Matrix.create_scalar(total_sum)
         return out
 
     def max(self) -> "Matrix":
@@ -146,7 +156,7 @@ class Matrix:
             for col in range(self.cols):
                 max_value = max(max_value, self[row, col])
 
-        out = Matrix.create_from_value(max_value)
+        out = Matrix.create_scalar(max_value)
         return out
 
     def relu(self) -> "Matrix":
@@ -192,4 +202,4 @@ class Matrix:
         assert self.rows == 1 and self.cols == 1
 
     def _is_one_dimensional(self) -> None:
-        assert self.cols == 1 and self.rows == 1
+        assert self.cols == 1 or self.rows == 1

@@ -1,10 +1,7 @@
 import collections
 import typing
 
-import numpy as np
-from numpy import typing as np_typing
-
-from pycrograd import grads
+from pycrograd import grads, matrix
 
 GradFunction = typing.Callable[["Tensor"], None]
 
@@ -16,22 +13,20 @@ def _default_backward(out: "Tensor") -> None:
 class Tensor:
     def __init__(
         self,
-        data: np_typing.NDArray[np.float32],
+        data: matrix.Matrix,
         op: str = "",
         backward: GradFunction = _default_backward,
         previous: typing.Sequence["Tensor"] = (),
         grad_args: typing.Sequence[float] = (),
         requires_grad: bool = False,
     ) -> None:
-        assert len(data.shape) == 2
-
         self.data = data
-        self.rows = len(data)
-        self.cols = len(data[0])
+        self.rows = data.rows
+        self.cols = data.cols
         self.requires_grad = requires_grad
 
         if self.requires_grad:
-            self.grad = np.zeros((self.rows, self.cols))
+            self.grad = matrix.Matrix.create_zeroed(self.rows, self.cols)
             self.op = op
             self.prev = previous
             self.grad_args = grad_args
@@ -54,7 +49,7 @@ class Tensor:
         requires_grad: bool = False,
     ) -> "Tensor":
         return Tensor.create_with_value(
-            0.0,
+            value=0.0,
             rows=rows,
             cols=cols,
             op=op,
@@ -75,11 +70,8 @@ class Tensor:
         grad_args: typing.Sequence[float] = (),
         requires_grad: bool = False,
     ) -> "Tensor":
-        data = np.array(
-            [[value for _col in range(cols)] for _row in range(rows)]
-        ).astype(np.float32)
         return Tensor(
-            data,
+            data=matrix.Matrix.create_with_value(rows, cols, value),
             requires_grad=requires_grad,
             op=op,
             backward=backward,
@@ -89,16 +81,15 @@ class Tensor:
 
     @staticmethod
     def create_vector(
-        it: typing.Iterable[float],
+        it: typing.Sequence[float],
         op: str = "",
         backward: GradFunction = _default_backward,
         previous: typing.Sequence["Tensor"] = (),
         grad_args: typing.Sequence[float] = (),
         requires_grad: bool = False,
     ) -> "Tensor":
-        data = np.array([[item] for item in it]).astype(np.float32)
         return Tensor(
-            data,
+            data=matrix.Matrix.create_vector(it),
             requires_grad=requires_grad,
             op=op,
             backward=backward,
@@ -116,7 +107,7 @@ class Tensor:
         requires_grad: bool = False,
     ) -> "Tensor":
         return Tensor(
-            np.array([[value]]).astype(np.float32),
+            matrix.Matrix.create_scalar(value),
             op=op,
             backward=backward,
             previous=previous,
@@ -156,13 +147,8 @@ class Tensor:
         return mean
 
     def sum(self) -> "Tensor":
-        sum = 0
-        for row in range(self.rows):
-            for col in range(self.cols):
-                sum += self[row, col]
-
-        out = Tensor.create_scalar(
-            sum,
+        out = Tensor(
+            data=self.data.sum(),
             op="sum",
             backward=grads.sum_backward,
             previous=(self,),
@@ -171,17 +157,13 @@ class Tensor:
         return out
 
     def log(self) -> "Tensor":
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data.log(),
             op="log",
             backward=grads.log_backward,
             previous=(self,),
             requires_grad=self.requires_grad,
         )
-        for row in range(out.rows):
-            for col in range(out.cols):
-                out[row, col] = np.log(self.data[row, col])
 
         return out
 
@@ -207,17 +189,13 @@ class Tensor:
         return out
 
     def relu(self) -> "Tensor":
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data.relu(),
             op="relu",
             backward=grads.relu_backward,
             previous=(self,),
             requires_grad=self.requires_grad,
         )
-        for row in range(out.rows):
-            for col in range(out.cols):
-                out[row, col] = max(self.data[row][col], 0)
 
         return out
 
@@ -225,36 +203,36 @@ class Tensor:
     # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
     # https://insidelearningmachines.com/cross_entropy_loss/
     # https://binpord.github.io/2021/09/26/softmax_backprop.html
-    def softmax(self) -> "Tensor":
-        assert self._is_vector()
+    # def softmax(self) -> "Tensor":
+    #     assert self._is_vector()
 
-        max_value = np.max(self.data)
-        stabilized_original = self.data - max_value
-        exponentials: np_typing.NDArray[np.float32] = np.exp(stabilized_original)
-        sum_exponentials: np.float32 = np.sum(exponentials.data)
+    #     max_value = self.data.max()
+    #     stabilized_original = self.data - max_value
+    #     exponentials = stabilized_original.exp()
+    #     sum_exponentials = exponentials.sum()
 
-        probabilities = exponentials / sum_exponentials
+    #     probabilities = exponentials / sum_exponentials.item()
 
-        out = Tensor(
-            probabilities,
-            op="softmax",
-            backward=grads.softmax_backward,
-            previous=(self,),
-            requires_grad=self.requires_grad,
-        )
+    #     out = Tensor(
+    #         probabilities,
+    #         op="softmax",
+    #         backward=grads.softmax_backward,
+    #         previous=(self,),
+    #         requires_grad=self.requires_grad,
+    #     )
 
-        return out
+    #     return out
 
     def log_softmax(self) -> "Tensor":
         assert self._is_vector()
 
-        max_value = np.max(self.data)
-        stabilized_original = self.data - max_value
-        exponentials = np.exp(stabilized_original)
-        sum_exponentials = np.sum(exponentials.data)
+        max_value = self.data.max()
+        stabilized_original = self.data - max_value.item()
+        exponentials = stabilized_original.exp()
+        sum_exponentials = exponentials.sum()
 
-        log_sum_exponentials = np.log(sum_exponentials)
-        log_probabilities_data = stabilized_original - log_sum_exponentials
+        log_sum_exponentials = sum_exponentials.log()
+        log_probabilities_data = stabilized_original - log_sum_exponentials.item()
 
         log_probabilities = Tensor(
             log_probabilities_data,
@@ -267,43 +245,34 @@ class Tensor:
         return log_probabilities
 
     def exp(self) -> "Tensor":
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data.exp(),
             op="exp",
             backward=grads.exp_backward,
             previous=(self,),
             requires_grad=self.requires_grad,
         )
-        for row in range(out.rows):
-            for col in range(out.cols):
-                out[row, col] = np.exp(self.data[row][col])
 
         return out
 
     def __getitem__(self, indexes: tuple[int, int]) -> float:
         row, col = indexes
-        return self.data[row][col]
+        return self.data[row, col]
 
     def __setitem__(self, indexes: tuple[int, int], value: float) -> None:
         row, col = indexes
-        self.data[row][col] = value
+        self.data[row, col] = value
 
     def __matmul__(self, other: "Tensor") -> "Tensor":
         assert self.cols == other.rows
 
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=other.cols,
+        out = Tensor(
+            data=self.data @ other.data,
             op="@",
             backward=grads.matmul_backward,
             previous=(self, other),
             requires_grad=self.requires_grad or other.requires_grad,
         )
-        for m in range(out.rows):
-            for k in range(self.cols):
-                for n in range(out.cols):
-                    out[m, n] += self[m, k] * other[k, n]
 
         return out
 
@@ -311,49 +280,37 @@ class Tensor:
         assert self.rows == other.rows
         assert self.cols == other.cols
 
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data + other.data,
             op="+",
             backward=grads.addition_backward,
             previous=(self, other),
             requires_grad=self.requires_grad or other.requires_grad,
         )
-        for row in range(out.rows):
-            for col in range(out.cols):
-                out[row, col] = self[row, col] + other[row, col]
 
         return out
 
     def __mul__(self, other: int | float) -> "Tensor":
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data * other,
             op="*",
             backward=grads.mul_backward,
             previous=(self,),
             grad_args=(other,),
             requires_grad=self.requires_grad,
         )
-        for row in range(self.rows):
-            for col in range(self.cols):
-                out[row, col] = self[row, col] * other
 
         return out
 
     def __pow__(self, other: int | float) -> "Tensor":
-        out = Tensor.create_zeroed(
-            rows=self.rows,
-            cols=self.cols,
+        out = Tensor(
+            data=self.data**other,
             op=f"**{other}",
             backward=grads.power_backward,
             previous=(self,),
             grad_args=(other,),
             requires_grad=self.requires_grad,
         )
-        for row in range(out.rows):
-            for col in range(out.cols):
-                out[row, col] = self[row, col] ** other
 
         return out
 

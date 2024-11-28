@@ -1,3 +1,4 @@
+import time
 import typing
 from datetime import datetime
 
@@ -37,6 +38,7 @@ class Trainer(typing.Generic[DataT, TargetT]):
     ) -> None:
         dataloader = datasets.Dataloader(batch_size, dataset=data)
 
+        start = time.time()
         for epoch in range(epochs):
             loss, accuracy = self.do_training(dataloader)
             print(
@@ -47,6 +49,10 @@ class Trainer(typing.Generic[DataT, TargetT]):
             print(
                 f"Validation Epoch {epoch:3}, loss {loss:3.4f}, accuracy {accuracy:3.2%}"
             )
+
+        end = time.time()
+        duration_in_seconds = end - start
+        print(f"Training took {duration_in_seconds} seconds.")
 
     def do_training(
         self, data: datasets.Dataloader[DataT, TargetT]

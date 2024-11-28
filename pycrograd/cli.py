@@ -22,7 +22,7 @@ def train_mlp(epochs: int = 100) -> None:
 
 
 @cli.command(name="train_digits")
-def train_digits(epochs: int = 10) -> None:
+def train_digits(epochs: int = 20) -> None:
     model = nn.MLPDigits()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
     trainer = trainers.Trainer(

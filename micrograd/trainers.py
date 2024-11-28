@@ -43,8 +43,7 @@ class MLPTrainer:
             # update (with sgd)
             self.optimizer.step()
 
-            if k % 1 == 0:
-                print(f"step {k} loss {total_loss.data}, accuracy {acc*100}%")
+            print(f"step {k} loss {total_loss.data}, accuracy {acc*100}%")
 
     def loss(self, data: Data) -> tuple[engine.Value, float]:
         # inline DataLoader :)

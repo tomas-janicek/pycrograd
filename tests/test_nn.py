@@ -1,8 +1,9 @@
-import numpy as np
+from array import array
+
 import torch
 from torch.nn import functional as F
 
-from pycrograd import nn, tensor
+from pycrograd import matrix, nn, tensor
 
 
 def test_get_parameters() -> None:
@@ -33,8 +34,8 @@ def test_cross_entropy_loss() -> None:
     target = torch.tensor([1])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Tensor(np.array([[75.0], [5.0], [20.0]]))
-    target = tensor.Tensor(np.array([[0, 1, 0]]))
+    input = tensor.Tensor(matrix.Matrix(3, 1, array("f", [75.0, 5.0, 20.0])))
+    target = tensor.Tensor(matrix.Matrix(1, 3, array("f", [0, 1, 0])))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 
@@ -46,8 +47,8 @@ def test_cross_entropy_loss_2() -> None:
     target = torch.tensor([0])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Tensor(np.array([[75.0], [5.0], [20.0]]))
-    target = tensor.Tensor(np.array([[1, 0, 0]]))
+    input = tensor.Tensor(matrix.Matrix(3, 1, array("f", [75.0, 5.0, 20.0])))
+    target = tensor.Tensor(matrix.Matrix(1, 3, array("f", [1, 0, 0])))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 
@@ -59,8 +60,8 @@ def test_cross_entropy_loss_random() -> None:
     target = torch.tensor([0])
     loss1 = F.cross_entropy(input, target)
 
-    input = tensor.Tensor(np.array([[75.0], [0.0], [2000.0]]))
-    target = tensor.Tensor(np.array([[1, 0, 0]]))
+    input = tensor.Tensor(matrix.Matrix(3, 1, array("f", [75.0, 0.0, 2000.0])))
+    target = tensor.Tensor(matrix.Matrix(1, 3, array("f", [1, 0, 0])))
     log_probabilities = input.log_softmax()
     loss2 = nn.cross_entropy_loss(input=[log_probabilities], target=[target])
 

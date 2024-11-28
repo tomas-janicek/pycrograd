@@ -1,7 +1,5 @@
 import typing
 
-import numpy as np
-
 from pycrograd import tensor
 
 from . import modules
@@ -89,10 +87,10 @@ def calculate_accuracy(
     all_predations = 0
     for i, t in zip(input, target, strict=True):
         # Step 1: Convert probabilities to predicted classes
-        predicted_classes = np.argmax(i.data, axis=0)
+        predicted_classes = i.data.argmax()
 
         # Step 2: Convert one-hot encoded targets to class labels
-        true_classes = np.argmax(t.data, axis=1)
+        true_classes = t.data.argmax()
 
         # Step 3: Calculate accuracy
         if predicted_classes == true_classes:
