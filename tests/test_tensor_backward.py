@@ -331,200 +331,7 @@ def test_exp() -> None:
     assert tt1.grad[1, 1] == t1.grad[1, 1]
 
 
-# def test_softmax() -> None:
-#     tt1 = torch.tensor(
-#         [[0.0], [2.0], [3.0]],
-#         requires_grad=True,
-#     )
-#     s1 = F.softmax(tt1, dim=0)
-
-#     t1 = tensor.Tensor(
-#         matrix.Matrix(1, 1, array("f", [[0.0], [2.0], [3.0]])),
-#         requires_grad=True,
-#     )
-#     s2 = t1.softmax()
-
-#     assert math.isclose(s1[0, 0], s2[0, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[1, 0], s2[1, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[2, 0], s2[2, 0], rel_tol=1e-3)
-
-#     sut1 = s1.sum()
-#     sut2 = s2.sum()
-
-#     assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-#     sut1.backward()
-#     sut2.backward()
-
-#     assert tt1.grad is not None
-#     assert t1.grad is not None
-#     assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
-# def test_softmax_2() -> None:
-#     tt1 = torch.tensor(
-#         [[2.0], [1.0], [0.1]],
-#         requires_grad=True,
-#     )
-#     s1 = F.softmax(tt1, dim=0)
-
-#     t1 = tensor.Tensor(
-#         matrix.Matrix(3, 1, array("f", [2.0, 1.0, 0.1])),
-#         requires_grad=True,
-#     )
-#     s2 = t1.softmax()
-
-#     assert math.isclose(s1[0, 0], s2[0, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[1, 0], s2[1, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[2, 0], s2[2, 0], rel_tol=1e-3)
-
-#     sut1 = s1.sum()
-#     sut2 = s2.sum()
-
-#     assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-#     sut1.backward()
-#     sut2.backward()
-
-#     assert tt1.grad is not None
-#     assert t1.grad is not None
-#     assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
-# def test_softmax_equal() -> None:
-#     tt1 = torch.tensor(
-#         [[1.0], [1.5], [1.75]],
-#         requires_grad=True,
-#     )
-#     s1 = F.softmax(tt1, dim=0)
-
-#     t1 = tensor.Tensor(
-#         matrix.Matrix(1, 1, array("f", [[1.0], [1.5], [1.75]])),
-#         requires_grad=True,
-#     )
-#     s2 = t1.softmax()
-
-#     assert math.isclose(s1[0, 0], s2[0, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[1, 0], s2[1, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[2, 0], s2[2, 0], rel_tol=1e-3)
-
-#     sut1 = s1.sum()
-#     sut2 = s2.sum()
-
-#     assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-#     sut1.backward()
-#     sut2.backward()
-
-#     assert tt1.grad is not None
-#     assert t1.grad is not None
-#     assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
-# def test_softmax_one_big() -> None:
-#     tt1 = torch.tensor(
-#         [[1.5], [26.0], [3000000.0]],
-#         requires_grad=True,
-#     )
-#     s1 = F.softmax(tt1, dim=0)
-
-#     t1 = tensor.Tensor(
-#         matrix.Matrix(1, 1, array("f", [[1.5], [26.0], [3000000.0]])),
-#         requires_grad=True,
-#     )
-#     s2 = t1.softmax()
-
-#     assert math.isclose(s1[0, 0], s2[0, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[1, 0], s2[1, 0], rel_tol=1e-3)
-#     assert math.isclose(s1[2, 0], s2[2, 0], rel_tol=1e-3)
-
-#     sut1 = s1.sum()
-#     sut2 = s2.sum()
-
-#     assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-#     sut1.backward()
-#     sut2.backward()
-
-#     assert tt1.grad is not None
-#     assert t1.grad is not None
-#     assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-#     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
 def test_log_softmax() -> None:
-    tt1 = torch.tensor(
-        [[1.5], [26.0], [3000000.0]],
-        requires_grad=True,
-    )
-    ls1 = F.log_softmax(tt1, dim=0)
-
-    t1 = tensor.Tensor(
-        matrix.Matrix(3, 1, array("f", [1.5, 26.0, 3000000.0])),
-        requires_grad=True,
-    )
-    ls2 = t1.log_softmax()
-
-    assert math.isclose(ls1[0, 0], ls2[0, 0], rel_tol=1e-3)
-    assert math.isclose(ls1[1, 0], ls2[1, 0], rel_tol=1e-3)
-    assert math.isclose(ls1[2, 0], ls2[2, 0], rel_tol=1e-3)
-
-    sut1 = ls1.sum()
-    sut2 = ls2.sum()
-
-    assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-    sut1.backward()
-    sut2.backward()
-
-    assert tt1.grad is not None
-    assert t1.grad is not None
-    # We do not care whether it is +/- if it is reasonably close to zero.
-    assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-    assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-    assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
-def test_log_softmax_2() -> None:
-    tt1 = torch.tensor(
-        [[1.5], [26.0], [10000.0]],
-        requires_grad=True,
-    )
-    ls1 = F.log_softmax(tt1, dim=0)
-
-    t1 = tensor.Tensor(
-        matrix.Matrix(3, 1, array("f", [1.5, 26.0, 10000.0])),
-        requires_grad=True,
-    )
-    ls2 = t1.log_softmax()
-
-    assert math.isclose(ls1[0, 0], ls2[0, 0], rel_tol=1e-3)
-    assert math.isclose(ls1[1, 0], ls2[1, 0], rel_tol=1e-3)
-    assert math.isclose(ls1[2, 0], ls2[2, 0], rel_tol=1e-3)
-
-    sut1 = ls1.sum()
-    sut2 = ls2.sum()
-
-    assert math.isclose(sut1.item(), sut2.item(), rel_tol=1e-3)
-
-    sut1.backward()
-    sut2.backward()
-
-    assert tt1.grad is not None
-    assert t1.grad is not None
-    assert math.isclose(tt1.grad[0, 0], t1.grad[0, 0], abs_tol=1e-5)
-    assert math.isclose(tt1.grad[1, 0], t1.grad[1, 0], abs_tol=1e-5)
-    assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
-
-
-def test_log_softmax_3() -> None:
     tt1 = torch.tensor(
         [[0.5], [0.75], [0.01]],
         requires_grad=True,
@@ -556,15 +363,15 @@ def test_log_softmax_3() -> None:
     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
 
 
-def test_log_softmax_4() -> None:
+def test_log_softmax_one_big() -> None:
     tt1 = torch.tensor(
-        [[1.5], [3000000.0], [3000000.0]],
+        [[1.5], [26.0], [10000.0]],
         requires_grad=True,
     )
     ls1 = F.log_softmax(tt1, dim=0)
 
     t1 = tensor.Tensor(
-        matrix.Matrix(3, 1, array("f", [1.5, 3000000.0, 3000000.0])),
+        matrix.Matrix(3, 1, array("f", [1.5, 26.0, 10000.0])),
         requires_grad=True,
     )
     ls2 = t1.log_softmax()
@@ -588,15 +395,15 @@ def test_log_softmax_4() -> None:
     assert math.isclose(tt1.grad[2, 0], t1.grad[2, 0], abs_tol=1e-5)
 
 
-def test_log_softmax_5() -> None:
+def test_log_softmax_two_even() -> None:
     tt1 = torch.tensor(
-        [[0.5], [200.0], [2000.0]],
+        [[1.5], [3000000.0], [3000000.0]],
         requires_grad=True,
     )
     ls1 = F.log_softmax(tt1, dim=0)
 
     t1 = tensor.Tensor(
-        matrix.Matrix(3, 1, array("f", [0.5, 200.0, 2000.0])),
+        matrix.Matrix(3, 1, array("f", [1.5, 3000000.0, 3000000.0])),
         requires_grad=True,
     )
     ls2 = t1.log_softmax()

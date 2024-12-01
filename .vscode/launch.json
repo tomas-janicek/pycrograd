@@ -50,6 +50,21 @@
             "justMyCode": false,
         },
         {
+            "name": "Run Pycrograd Benchmark",
+            "consoleTitle": "Run Pycrograd Benchmark",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceRoot}/pycrograd/cli.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "."
+            },
+            "args": [
+                "run_digits_benchmark",
+            ],
+            "justMyCode": false,
+        },
+        {
             "name": "Train Pycrograd MNIST",
             "consoleTitle": "Train Pycrograd MNIST",
             "type": "debugpy",

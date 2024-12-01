@@ -2,7 +2,7 @@ import os
 
 import typer
 
-from pycrograd import datasets, nn, trainers
+from pycrograd import datasets, digits, nn, trainers
 
 cli = typer.Typer()
 
@@ -22,17 +22,22 @@ def train_mlp(epochs: int = 100) -> None:
 
 
 @cli.command(name="train_digits")
-def train_digits(epochs: int = 20) -> None:
+def train_digits(epochs: int = 5, length: int = 10) -> None:
     model = nn.MLPDigits()
-    optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
-    trainer = trainers.Trainer(
-        model=model,
-        optimizer=optimizer,
-        loss_function=nn.cross_entropy_loss,
-        accuracy_function=nn.calculate_accuracy,
-    )
-    data = datasets.DigitsData(length=1000)
-    trainer.fit(epochs=epochs, batch_size=32, data=data)
+    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
+
+
+@cli.command(name="run_digits_benchmark")
+def run_digits_benchmark(epochs: int = 1, length: int = 10) -> None:
+    print("\nTraining on Normal Model")
+    model = nn.MLPDigits()
+    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
+    print("\nTraining on Longer Model")
+    model = nn.MLPDigitsLonger(n_layers=30)
+    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
+    print("\nTraining on Bigger Model")
+    model = nn.MLPDigitsBigger()
+    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
 
 
 @cli.command(name="train_mnist")

@@ -203,26 +203,6 @@ class Tensor:
     # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
     # https://insidelearningmachines.com/cross_entropy_loss/
     # https://binpord.github.io/2021/09/26/softmax_backprop.html
-    # def softmax(self) -> "Tensor":
-    #     assert self._is_vector()
-
-    #     max_value = self.data.max()
-    #     stabilized_original = self.data - max_value
-    #     exponentials = stabilized_original.exp()
-    #     sum_exponentials = exponentials.sum()
-
-    #     probabilities = exponentials / sum_exponentials.item()
-
-    #     out = Tensor(
-    #         probabilities,
-    #         op="softmax",
-    #         backward=grads.softmax_backward,
-    #         previous=(self,),
-    #         requires_grad=self.requires_grad,
-    #     )
-
-    #     return out
-
     def log_softmax(self) -> "Tensor":
         assert self._is_vector()
 

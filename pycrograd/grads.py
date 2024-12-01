@@ -120,23 +120,6 @@ def exp_backward(out: "tensor.Tensor") -> None:
             m.grad[row, col] += math.exp(m[row, col]) * out.grad[row, col]
 
 
-# def softmax_backward(out: "tensor.Tensor") -> None:
-#     m, *_ = out.prev
-
-#     assert m.grad is not None and out.grad is not None
-
-#     row_vector = out.data.T
-#     row_vector_grad = out.grad.T
-
-#     identity = np.eye(len(out), dtype=np.float32)
-#     jacobian = row_vector[:, :, None] * (identity[None, :, :] - row_vector[:, None, :])
-
-#     grad = (jacobian @ row_vector_grad[:, :, None]).squeeze(2)
-#     for row in range(m.rows):
-#         for col in range(m.cols):
-#             m.grad[row, col] = grad[col, row]
-
-
 def log_softmax_backward(out: "tensor.Tensor") -> None:
     m, *_ = out.prev
 

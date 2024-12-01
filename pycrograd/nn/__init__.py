@@ -7,13 +7,15 @@ from .loss import (
     get_reg_loss,
     max_margin_loss,
 )
-from .models import MLP, MLPDigits, MLPMnist
+from .models import MLP, MLPDigits, MLPDigitsBigger, MLPDigitsLonger, MLPMnist
 from .modules import Linear, Module, ParametersDict
 from .optimizers import SGD, Optimizer, SGDVariable
 
 __all__ = [
     "MLP",
     "MLPDigits",
+    "MLPDigitsLonger",
+    "MLPDigitsBigger",
     "MLPMnist",
     "Linear",
     "Module",

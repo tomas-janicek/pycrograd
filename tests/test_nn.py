@@ -55,7 +55,7 @@ def test_cross_entropy_loss_2() -> None:
     assert loss1.item() == loss2.item()
 
 
-def test_cross_entropy_loss_random() -> None:
+def test_cross_entropy_loss_3() -> None:
     input = torch.tensor([[75.0, 0.0, 2000.0]])
     target = torch.tensor([0])
     loss1 = F.cross_entropy(input, target)
