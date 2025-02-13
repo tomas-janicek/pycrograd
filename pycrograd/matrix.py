@@ -5,7 +5,6 @@ from array import array
 
 
 class Matrix:
-    # Initialize taking a pointer, don't set any elements
     def __init__(
         self,
         rows: int,

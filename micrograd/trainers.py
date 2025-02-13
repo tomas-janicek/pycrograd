@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from profilehooks import profile
@@ -32,6 +33,7 @@ class MLPTrainer:
         dirs=True,
     )  # type: ignore
     def fit(self, epochs: int, data: Data) -> None:
+        start = time.time()
         for k in range(epochs):
             # forward
             total_loss, acc = self.loss(data)
@@ -44,6 +46,10 @@ class MLPTrainer:
             self.optimizer.step()
 
             print(f"step {k} loss {total_loss.data}, accuracy {acc*100}%")
+
+        end = time.time()
+        duration_in_seconds = end - start
+        print(f"Training took {duration_in_seconds} seconds.")
 
     def loss(self, data: Data) -> tuple[engine.Value, float]:
         # inline DataLoader :)

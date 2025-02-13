@@ -199,10 +199,6 @@ class Tensor:
 
         return out
 
-    # Sources
-    # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
-    # https://insidelearningmachines.com/cross_entropy_loss/
-    # https://binpord.github.io/2021/09/26/softmax_backprop.html
     def log_softmax(self) -> "Tensor":
         assert self._is_vector()
 

@@ -8,7 +8,7 @@ cli = typer.Typer()
 
 
 @cli.command(name="train_mlp")
-def train_mlp(epochs: int = 100) -> None:
+def train_mlp(epochs: int = 100, length: int = 100) -> None:
     model = nn.MLP()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
     trainer = trainers.Trainer(
@@ -17,7 +17,7 @@ def train_mlp(epochs: int = 100) -> None:
         loss_function=nn.max_margin_loss,
         accuracy_function=nn.calculate_accuracy_binary,
     )
-    data = datasets.MoonsData(length=1000)
+    data = datasets.MoonsData(length=length)
     trainer.fit(epochs=epochs, batch_size=10, data=data)
 
 
@@ -28,20 +28,22 @@ def train_digits(epochs: int = 5, length: int = 10) -> None:
 
 
 @cli.command(name="run_digits_benchmark")
-def run_digits_benchmark(epochs: int = 1, length: int = 10) -> None:
-    print("\nTraining on Normal Model")
+def run_digits_benchmark(epochs: int = 10, length: int = 1000) -> None:
+    print(f"\nTraining on Normal Model with {length} samples")
     model = nn.MLPDigits()
     digits.train_digits_on_model(epochs=epochs, length=length, model=model)
-    print("\nTraining on Longer Model")
+    longer_length = length // 10
+    print(f"\nTraining on Longer Model on {longer_length} samples")
     model = nn.MLPDigitsLonger(n_layers=30)
-    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
-    print("\nTraining on Bigger Model")
+    digits.train_digits_on_model(epochs=epochs, length=longer_length, model=model)
+    bigger_length = length // 100
+    print(f"\nTraining on Bigger Model on {bigger_length} samples")
     model = nn.MLPDigitsBigger()
-    digits.train_digits_on_model(epochs=epochs, length=length, model=model)
+    digits.train_digits_on_model(epochs=epochs, length=bigger_length, model=model)
 
 
 @cli.command(name="train_mnist")
-def train_mnist(epochs: int = 5) -> None:
+def train_mnist(epochs: int = 5, length: int = 100) -> None:
     model = nn.MLPMnist()
     optimizer = nn.SGD(learning_rate=0.01, parameters_dict=model.parameters())
     trainer = trainers.Trainer(
@@ -50,7 +52,7 @@ def train_mnist(epochs: int = 5) -> None:
         loss_function=nn.cross_entropy_loss,
         accuracy_function=nn.calculate_accuracy,
     )
-    data = datasets.MnistData(length=100)
+    data = datasets.MnistData(length=length)
     trainer.fit(epochs=epochs, batch_size=32, data=data)
 
 

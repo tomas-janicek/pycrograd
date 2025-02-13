@@ -8,11 +8,11 @@ cli = typer.Typer()
 
 
 @cli.command(name="train_mlp")
-def train_mlp(epochs: int = 100) -> None:
+def train_mlp(epochs: int = 100, length: int = 100) -> None:
     model = nn.MLP()
     optimizer = optimizers.SGD(learning_rate=1, parameters=model.parameters())
     trainer = trainers.MLPTrainer(model=model, optimizer=optimizer)
-    data = trainers.Data(100)
+    data = trainers.Data(length)
     trainer.fit(epochs=epochs, data=data)
 
 
