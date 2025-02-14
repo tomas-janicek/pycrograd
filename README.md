@@ -31,7 +31,7 @@ uv sync
 
 ## 📘 Usage
 
-### Running Pycrograd
+### 🏃‍♂️ Running Pycrograd
 
 ```sh
 PYTHONPATH=. uv run pycrograd/cli.py train_mlp --epochs=100 --length=100
@@ -39,7 +39,7 @@ PYTHONPATH=. uv run pycrograd/cli.py train_digits --epochs=10 --length=100
 PYTHONPATH=. uv run pycrograd/cli.py train_mnist --epochs=10 --length=100
 ```
 
-### Running Micrograd
+### 🏃‍♂️ Running Micrograd
 
 ```sh
 PYTHONPATH=. uv run micrograd/cli.py train_mlp --epochs=10 --length=100
@@ -57,7 +57,7 @@ PYTHONPATH=. uv run pytest tests/
 
 All benchmarks are run on a MacBook Pro M1 with 32 GB of RAM.
 
-### Comparing Pycrograd with Micrograd
+### 🔍 Comparing Pycrograd with Micrograd
 
 To run the benchmarks, use the following command:
 
@@ -72,7 +72,7 @@ PYTHONPATH=. uv run pycrograd/cli.py train_mlp --epochs=10 --length=100
 - Micrograd training took 94.781 seconds.
 - Pycrograd training took 8.716 seconds.
 
-#### Why is Pycrograd faster than Micrograd?
+#### 🚀 Why is Pycrograd faster than Micrograd?
 
 Pycrograd is faster than Micrograd for several reasons:
 
@@ -91,17 +91,17 @@ PYTHONPATH=. uv run pycrograd/cli.py run_digits_benchmark
 
 All benchmarks are run on a MacBook Pro M1 with 32 GB of RAM.
 
-#### Network size **[Normal]** 64 -> 64 -> 32 -> 10
+#### 🧠 Network size **[Normal]** 64 -> 64 -> 32 -> 10
 
 - Training with Pycrograd: 121.291 seconds
 - Training with Mocrograd: 20.281 seconds
 
-#### Network size **[Longer]** 64 [(-> 256) * 29] -> 10 (total of 30 layers)
+#### 🧠 Network size **[Longer]** 64 [(-> 256) * 29] -> 10 (total of 30 layers)
 
 - Training with Pycrograd: 4610.141 seconds (1 hour, 16 minutes, and 50.14 seconds)
 - Training with Mocrograd: 56.842 seconds
 
-#### Network size **[Bigger]** 64 -> 8192 -> 4096 -> 2048 -> 10
+#### 🧠 Network size **[Bigger]** 64 -> 8192 -> 4096 -> 2048 -> 10
 
 - Training with Pycrograd: 13484.485 seconds (3 hours, 44 minutes, and 44.52 seconds)
 - Training with Mocrograd: 94.953 seconds
