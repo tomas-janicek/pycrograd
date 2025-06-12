@@ -115,3 +115,4 @@ Why is Mocrograd so much faster is explained in Mocrograd README.
 - [The Softmax function and its derivative](https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/)
 - [A Simple Introduction to Cross Entropy Loss](https://insidelearningmachines.com/cross_entropy_loss/)
 - [Backpropagation through softmax layer](https://binpord.github.io/2021/09/26/softmax_backprop.html)
+- [Distributed TensorFlow](https://www.oreilly.com/content/distributed-tensorflow/)
